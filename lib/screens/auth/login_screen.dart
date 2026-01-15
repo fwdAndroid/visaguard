@@ -67,6 +67,8 @@ Future<void> _login() async {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.asset('assets/logo.png', height: 160),
+            const SizedBox(height: 24),
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
