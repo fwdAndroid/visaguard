@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:visaguard/screens/auth/forgot_password_screen.dart';
 import 'package:visaguard/screens/auth/signup_screen.dart';
-import 'package:visaguard/screens/main/main_dashboard_screen.dart';
+import 'package:visaguard/screens/video_screen.dart';
 import 'package:visaguard/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,7 +46,7 @@ Future<void> _login() async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const MainDashboardScreen(),
+        builder: (_) => const VideoScreen(),
       ),
     );
   } catch (e) {
