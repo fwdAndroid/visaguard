@@ -190,7 +190,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.black),
                       controller: _usernameController,
                       decoration: InputDecoration(
                         enabledBorder: OutlineInputBorder(

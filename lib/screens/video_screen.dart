@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visaguard/screens/main/main_dashboard_screen.dart';
@@ -32,12 +31,10 @@ class _VideoScreenState extends State<VideoScreen> {
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        final videoPath = snapshot.docs.first['storagePath'] as String;
+        // Directly use the 'url' field from Firestore
+        final videoUrl = snapshot.docs.first['url'] as String;
 
-        // Get download URL from Firebase Storage
-        final url = await FirebaseStorage.instance.ref(videoPath).getDownloadURL();
-
-        _controller = VideoPlayerController.network(url)
+        _controller = VideoPlayerController.network(videoUrl)
           ..initialize().then((_) {
             setState(() {
               _isLoading = false;
@@ -84,7 +81,7 @@ class _VideoScreenState extends State<VideoScreen> {
       });
     }
 
-    // Prevent skipping: if position > previous progress, fine; otherwise, reset
+    // Prevent skipping: if user tries to seek ahead, reset to current progress
     if (position > duration * watchedPercent) {
       _controller!.seekTo(duration * watchedPercent);
     }
@@ -135,7 +132,8 @@ class _VideoScreenState extends State<VideoScreen> {
                       ? () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+                            MaterialPageRoute(
+                                builder: (_) => const MainDashboardScreen()),
                           );
                         }
                       : null,

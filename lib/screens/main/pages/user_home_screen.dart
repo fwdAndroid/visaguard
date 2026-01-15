@@ -1,12 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class UserHomeScreen extends StatefulWidget {
-  const UserHomeScreen({super.key, });
+  const UserHomeScreen({super.key});
 
   @override
   State<UserHomeScreen> createState() => _UserHomeScreenState();
@@ -56,7 +55,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  Widget _buildInfoTile(IconData icon, String label, String value, Color color) {
+  Widget _buildInfoTile(
+      IconData icon, String label, String value, Color color) {
     return Card(
       elevation: 4,
       shadowColor: color.withOpacity(0.4),
@@ -74,12 +74,31 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
+  void _openVisaPdf(String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(
+            title: const Text('Visa Document'),
+            backgroundColor: Colors.deepPurple,
+          ),
+          body: SfPdfViewer.network(url),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('User Profile'),
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'User Profile',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
       ),
@@ -167,20 +186,17 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 16),
+                                    vertical: 16, horizontal: 40),
                                 backgroundColor: Colors.deepPurple,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16))),
-                            icon: const Icon(Icons.picture_as_pdf, size: 28),
-                            label: const Text('View Visa Document',
-                                style: TextStyle(fontSize: 18)),
-                            onPressed: () async {
-                              final url = Uri.parse(userData!['visaDocUrl']);
-                              if (await canLaunchUrl(url)) {
-                                await launchUrl(url,
-                                    mode: LaunchMode.externalApplication);
-                              }
-                            },
+                            icon: const Icon(Icons.picture_as_pdf,
+                                size: 28, color: Colors.white),
+                            label: const Text('View Visa',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
+                            onPressed: () =>
+                                _openVisaPdf(userData!['visaDocUrl']),
                           ),
                         ),
                       const SizedBox(height: 40),
