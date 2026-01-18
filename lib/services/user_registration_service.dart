@@ -15,13 +15,14 @@ class UserRegistrationService {
     return await ref.getDownloadURL();
   }
 
-  Future<void> saveUserProfile({
+ Future<void> saveUserProfile({
     required String uid,
     required String name,
     required String email,
     required String phone,
     required String passportNumber,
     required String selfieUrl,
+    required String location,
   }) async {
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
@@ -30,8 +31,12 @@ class UserRegistrationService {
       'phone': phone,
       'passportNumber': passportNumber,
       'selfieUrl': selfieUrl,
+      'location': location,
       'isApproved': false,
       'createdAt': FieldValue.serverTimestamp(),
+      'approvedAt': null,
     });
   }
+
+
 }
