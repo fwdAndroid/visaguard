@@ -11,6 +11,9 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
+  List<Map<String, dynamic>> videos = [];
+  int currentIndex = 0;
+
   VideoPlayerController? _controller;
   bool _isButtonEnabled = false;
   bool _isLoading = true;
@@ -19,45 +22,50 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   void initState() {
     super.initState();
-    _loadVideo();
+    _loadVideos();
   }
 
-  Future<void> _loadVideo() async {
+  Future<void> _loadVideos() async {
     try {
-      // Fetch first video URL from Firestore 'videos' collection
-      final snapshot = await FirebaseFirestore.instance
-          .collection('videos')
-          .limit(1)
-          .get();
+      final snapshot =
+          await FirebaseFirestore.instance.collection('videos').get();
 
       if (snapshot.docs.isNotEmpty) {
-        // Directly use the 'url' field from Firestore
-        final videoUrl = snapshot.docs.first['url'] as String;
+        videos = snapshot.docs
+            .map((doc) => {'id': doc.id, 'url': doc['url'] as String})
+            .toList();
 
-        _controller = VideoPlayerController.network(videoUrl)
-          ..initialize().then((_) {
-            setState(() {
-              _isLoading = false;
-            });
-            _controller!.play();
-
-            // Listen for progress
-            _controller!.addListener(_checkProgress);
-          });
-
-        // Prevent scrubbing by disabling gestures
-        _controller!.setLooping(false);
+        _loadVideoAtIndex(0);
       } else {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
       }
     } catch (e) {
-      debugPrint('Error loading video: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      debugPrint('Error loading videos: $e');
+      setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _loadVideoAtIndex(int index) async {
+    if (_controller != null) {
+      _controller!.removeListener(_checkProgress);
+      await _controller!.pause();
+      await _controller!.dispose();
+    }
+
+    final videoUrl = videos[index]['url'];
+
+    _controller = VideoPlayerController.network(videoUrl)
+      ..initialize().then((_) {
+        setState(() {
+          _isLoading = false;
+          _progress = 0.0;
+          _isButtonEnabled = false;
+        });
+        _controller!.play();
+        _controller!.addListener(_checkProgress);
+      });
+
+    _controller!.setLooping(false);
   }
 
   void _checkProgress() {
@@ -70,20 +78,30 @@ class _VideoScreenState extends State<VideoScreen> {
 
     final watchedPercent = position.inMilliseconds / duration.inMilliseconds;
 
-    // Update progress bar
     setState(() {
       _progress = watchedPercent.clamp(0.0, 1.0);
     });
 
     if (watchedPercent >= 0.9 && !_isButtonEnabled) {
-      setState(() {
-        _isButtonEnabled = true;
-      });
+      setState(() => _isButtonEnabled = true);
     }
 
-    // Prevent skipping: if user tries to seek ahead, reset to current progress
+    // Prevent skipping
     if (position > duration * watchedPercent) {
       _controller!.seekTo(duration * watchedPercent);
+    }
+  }
+
+  void _nextVideo() {
+    if (currentIndex < videos.length - 1) {
+      currentIndex++;
+      _loadVideoAtIndex(currentIndex);
+    } else {
+      // All videos completed → go to dashboard
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
+      );
     }
   }
 
@@ -97,7 +115,7 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Watch Video')),
+      appBar: AppBar(title: const Text('Watch Videos')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -121,23 +139,22 @@ class _VideoScreenState extends State<VideoScreen> {
                       ],
                     ),
                   ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                Text(
+                  'Video ${currentIndex + 1} of ${videos.length}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
                 Text(
                   'Watched: ${(_progress * 100).toStringAsFixed(1)}%',
                   style: const TextStyle(fontSize: 16),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: _isButtonEnabled
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const MainDashboardScreen()),
-                          );
-                        }
-                      : null,
-                  child: const Text('Next'),
+                  onPressed: _isButtonEnabled ? _nextVideo : null,
+                  child: Text(currentIndex < videos.length - 1
+                      ? 'Next Video'
+                      : 'Go to Dashboard'),
                 ),
               ],
             ),
