@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
-                  labelText: 'Email / Phone',
+                  labelText: 'Phone',
                   hintText: 'Enter number (e.g., 91234)',
                 ),
               ),
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: const InputDecoration(labelText: 'Enter Passport'),
               ),
               Align(
                 alignment: Alignment.centerRight,

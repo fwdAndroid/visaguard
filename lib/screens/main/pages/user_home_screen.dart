@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -29,21 +30,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           .get();
 
       if (doc.exists) {
-        setState(() {
-          userData = doc.data();
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          isLoading = false;
-        });
+        userData = doc.data();
       }
     } catch (e) {
-      debugPrint('Error fetching user data: $e');
-      setState(() {
-        isLoading = false;
-      });
+      debugPrint('Error: $e');
     }
+    setState(() => isLoading = false);
   }
 
   ImageProvider? _getSelfieImage(String base64String) {
@@ -58,18 +50,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Widget _buildInfoTile(
       IconData icon, String label, String value, Color color) {
     return Card(
-      elevation: 4,
-      shadowColor: color.withOpacity(0.4),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 4,
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: color.withOpacity(0.2),
-          child: Icon(icon, color: color, size: 28),
+          child: Icon(icon, color: color),
         ),
-        title: Text(label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        subtitle: Text(value, style: const TextStyle(fontSize: 15)),
+        title: Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(value),
       ),
     );
   }
@@ -89,18 +79,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     );
   }
 
+  Future<void> _openWhatsApp() async {
+    const phoneNumber = '917718860398'; // without +
+    final Uri uri = Uri.parse('https://wa.me/$phoneNumber');
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('WhatsApp not available')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          'User Profile',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('User Profile'),
         backgroundColor: Colors.deepPurple,
-        elevation: 0,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -109,65 +106,58 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
               : SingleChildScrollView(
                   child: Column(
                     children: [
-                      // Gradient Card
+                      // Header
                       Container(
                         width: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Colors.deepPurple, Colors.purpleAccent],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(30),
-                              bottomRight: Radius.circular(30)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.purple.withOpacity(0.4),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
                         padding: const EdgeInsets.symmetric(
                             vertical: 40, horizontal: 16),
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.deepPurple, Colors.purpleAccent],
+                          ),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(30),
+                            bottomRight: Radius.circular(30),
+                          ),
+                        ),
                         child: Column(
                           children: [
                             CircleAvatar(
-                              radius: 70,
+                              radius: 65,
                               backgroundColor: Colors.white,
                               backgroundImage: userData!['selfieUrl'] != null
                                   ? _getSelfieImage(userData!['selfieUrl'])
                                   : null,
                               child: userData!['selfieUrl'] == null
-                                  ? const Icon(Icons.person,
-                                      size: 70, color: Colors.grey)
+                                  ? const Icon(Icons.person, size: 60)
                                   : null,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             Text(
                               userData!['name'] ?? 'N/A',
                               style: const TextStyle(
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white),
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold),
                             ),
-                            const SizedBox(height: 8),
                             Text(
-                              userData!['email'] ?? 'N/A',
-                              style: const TextStyle(
-                                  fontSize: 16, color: Colors.white70),
+                              userData!['phone'] ?? 'N/A',
+                              style:
+                                  const TextStyle(color: Colors.white70),
                             ),
                           ],
                         ),
                       ),
+
                       const SizedBox(height: 20),
 
-                      // Info Tiles
                       _buildInfoTile(Icons.phone, 'Phone',
                           userData!['phone'] ?? 'N/A', Colors.green),
-                      _buildInfoTile(Icons.card_travel, 'Passport Number',
-                          userData!['passportNumber'] ?? 'N/A', Colors.orange),
+                      _buildInfoTile(
+                          Icons.card_travel,
+                          'Passport Number',
+                          userData!['passportNumber'] ?? 'N/A',
+                          Colors.orange),
                       _buildInfoTile(
                           Icons.date_range,
                           'Uploaded At',
@@ -177,28 +167,77 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   .toString()
                               : 'N/A',
                           Colors.purple),
+
                       const SizedBox(height: 20),
 
-                      // Visa Document Button
+                      // View Visa Button
                       if (userData!['visaDocUrl'] != null)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 32),
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 40),
-                                backgroundColor: Colors.deepPurple,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16))),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: Colors.deepPurple,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
                             icon: const Icon(Icons.picture_as_pdf,
-                                size: 28, color: Colors.white),
+                                color: Colors.white),
                             label: const Text('View Visa',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
+                                style: TextStyle(color: Colors.white)),
                             onPressed: () =>
                                 _openVisaPdf(userData!['visaDocUrl']),
                           ),
                         ),
+
+                      const SizedBox(height: 20),
+
+                      // Two Buttons
+                      Padding(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(14)),
+                                ),
+                                onPressed:_openWhatsApp,
+                                child: const Text('Visa Extension',
+                                    style:
+                                        TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(14)),
+                                ),
+                                onPressed: _openWhatsApp,
+                                child: const Text('Contact Us',
+                                    style:
+                                        TextStyle(color: Colors.white)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
                       const SizedBox(height: 40),
                     ],
                   ),

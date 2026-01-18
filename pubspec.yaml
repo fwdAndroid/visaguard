@@ -39,6 +39,7 @@ dependencies:
   geocoding: ^4.0.0
   geolocator: ^14.0.2
   image_picker: ^1.2.1
+  shared_preferences: ^2.5.4
   syncfusion_flutter_pdfviewer: ^32.1.23
   url_launcher: ^6.3.2
   video_player: ^2.10.1

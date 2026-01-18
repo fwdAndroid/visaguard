@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 
 class VideoScreen extends StatefulWidget {
@@ -48,7 +49,6 @@ class _VideoScreenState extends State<VideoScreen> {
   Future<void> _loadVideoAtIndex(int index) async {
     if (_controller != null) {
       _controller!.removeListener(_checkProgress);
-      await _controller!.pause();
       await _controller!.dispose();
     }
 
@@ -74,30 +74,28 @@ class _VideoScreenState extends State<VideoScreen> {
     final position = _controller!.value.position;
     final duration = _controller!.value.duration;
 
-    if (duration.inSeconds == 0) return;
+    if (duration.inMilliseconds == 0) return;
 
-    final watchedPercent = position.inMilliseconds / duration.inMilliseconds;
+    final watchedPercent =
+        position.inMilliseconds / duration.inMilliseconds;
 
     setState(() {
       _progress = watchedPercent.clamp(0.0, 1.0);
     });
 
     if (watchedPercent >= 0.9 && !_isButtonEnabled) {
-      setState(() => _isButtonEnabled = true);
-    }
-
-    // Prevent skipping
-    if (position > duration * watchedPercent) {
-      _controller!.seekTo(duration * watchedPercent);
+      _isButtonEnabled = true;
     }
   }
 
-  void _nextVideo() {
+  Future<void> _nextVideo() async {
     if (currentIndex < videos.length - 1) {
       currentIndex++;
       _loadVideoAtIndex(currentIndex);
     } else {
-      // All videos completed → go to dashboard
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('hasWatchedVideos', true);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MainDashboardScreen()),
@@ -133,7 +131,6 @@ class _VideoScreenState extends State<VideoScreen> {
                           child: LinearProgressIndicator(
                             value: _progress,
                             backgroundColor: Colors.black26,
-                            color: Colors.blueAccent,
                           ),
                         ),
                       ],
@@ -147,14 +144,15 @@ class _VideoScreenState extends State<VideoScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Watched: ${(_progress * 100).toStringAsFixed(1)}%',
-                  style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: _isButtonEnabled ? _nextVideo : null,
-                  child: Text(currentIndex < videos.length - 1
-                      ? 'Next Video'
-                      : 'Go to Dashboard'),
+                  child: Text(
+                    currentIndex < videos.length - 1
+                        ? 'Next Video'
+                        : 'Go to Dashboard',
+                  ),
                 ),
               ],
             ),
