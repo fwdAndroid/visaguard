@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:visaguard/helper/location_helper.dart';
 
 class UserRegistrationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,16 +15,16 @@ class UserRegistrationService {
     await ref.putFile(selfie);
     return await ref.getDownloadURL();
   }
-
- Future<void> saveUserProfile({
+Future<void> saveUserProfile({
     required String uid,
     required String name,
     required String email,
     required String phone,
     required String passportNumber,
     required String selfieUrl,
-    required String location,
   }) async {
+    final location = await LocationHelper.getCurrentAddress();
+
     await _firestore.collection('users').doc(uid).set({
       'uid': uid,
       'name': name,
@@ -31,12 +32,14 @@ class UserRegistrationService {
       'phone': phone,
       'passportNumber': passportNumber,
       'selfieUrl': selfieUrl,
-      'location': location,
-      'isApproved': false,
+      'latitude': location['latitude'],
+      'longitude': location['longitude'],
+      'location': location['address'],
+      'lastLocationUpdated': FieldValue.serverTimestamp(),
       'createdAt': FieldValue.serverTimestamp(),
-      'approvedAt': null,
     });
   }
+
 
 
 }

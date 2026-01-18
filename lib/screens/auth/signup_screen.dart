@@ -232,7 +232,6 @@ class _SignupFlowScreenState extends State<SignupFlowScreen> {
                 phone: data.phone!,
                 passportNumber: data.passport!,
                 selfieUrl: selfieUrl,
-                location: location,
               );
 
               loading = false;

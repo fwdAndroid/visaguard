@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visaguard/screens/auth/forgot_password_screen.dart';
 import 'package:visaguard/screens/auth/signup_screen.dart';
 import 'package:visaguard/screens/video_screen.dart';
+import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 import 'package:visaguard/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,34 +23,25 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = true);
 
     try {
-      // Append @gmail.com automatically
+      // Phone → email format
       final emailInput = _emailController.text.trim();
       final email = '$emailInput@gmail.com';
 
-      final credential = await _authService.signIn(
+      await _authService.signIn(
         email: email,
         password: _passwordController.text.trim(),
       );
 
-      final uid = credential.user!.uid;
-      final isApproved = await _authService.isUserApproved(uid);
+      // Check local video flag
+      final prefs = await SharedPreferences.getInstance();
+      final hasWatchedVideos =
+          prefs.getBool('hasWatchedVideos') ?? false;
 
-      if (!isApproved) {
-        await _authService.signOut();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Your account is still under admin approval.'),
-          ),
-        );
-        setState(() => _loading = false);
-        return;
-      }
-
-      // Approved → Open dashboard
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const VideoScreen(),
+          builder: (_) =>
+              hasWatchedVideos ? const MainDashboardScreen() : const VideoScreen(),
         ),
       );
     } catch (e) {
@@ -71,8 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Image.asset('assets/logo.png', height: 160),
               const SizedBox(height: 24),
-              
-              // Email / Phone field (user only types numeric part)
+
+              // Phone field
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -86,22 +79,25 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Enter Passport'),
+                decoration:
+                    const InputDecoration(labelText: 'Enter Passport'),
               ),
+
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const ForgotPasswordScreen()),
+                      builder: (_) => const ForgotPasswordScreen(),
+                    ),
                   ),
                   child: const Text('Forgot Password?'),
                 ),
               ),
+
               const SizedBox(height: 16),
 
-              // Login button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -118,13 +114,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       : const Text('Login'),
                 ),
               ),
+
               const SizedBox(height: 8),
 
-              // Signup navigation
               TextButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const SignupFlowScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const SignupFlowScreen(),
+                  ),
                 ),
                 child: const Text("Don't have an account? Sign up"),
               ),
