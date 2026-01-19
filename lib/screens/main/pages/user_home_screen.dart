@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -26,7 +28,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   bool _showQrCode = false;
-
+DateTime? visaExpiryDate;
+bool isUploadingVisa = false;
   @override
   void initState() {
     super.initState();
@@ -78,12 +81,77 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
 
       if (doc.exists && doc.data()?['visaDocUrl'] != null) {
         visaDocUrl = doc['visaDocUrl'];
+        if (doc.data()?['expiryDate'] != null) {
+        visaExpiryDate =
+            (doc.data()!['expiryDate'] as Timestamp).toDate();
+      }
       }
     } catch (e) {
       debugPrint('Visa fetch error: $e');
     }
     setState(() => visaLoading = false);
   }
+Future<void> _pickVisaExpiryDate() async {
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: visaExpiryDate ?? DateTime.now(),
+    firstDate: DateTime.now(),
+    lastDate: DateTime(2100),
+  );
+
+  if (picked != null) {
+    setState(() => visaExpiryDate = picked);
+  }
+}
+
+Future<void> _uploadVisaFile() async {
+  if (visaExpiryDate == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please select expiry date')),
+    );
+    return;
+  }
+
+  final result = await FilePicker.platform.pickFiles(
+    withData: true,
+    type: FileType.custom,
+    allowedExtensions: ['pdf', 'jpg', 'png', 'doc', 'docx'],
+  );
+
+  if (result == null || result.files.single.bytes == null) return;
+
+  setState(() => isUploadingVisa = true);
+
+  try {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final file = result.files.single;
+
+    final ref = FirebaseStorage.instance.ref(
+      'visa_docs/$uid/${DateTime.now().millisecondsSinceEpoch}_${file.name}',
+    );
+
+    final snap = await ref.putData(file.bytes!);
+    final url = await snap.ref.getDownloadURL();
+
+    await FirebaseFirestore.instance
+        .collection('visa_documents')
+        .doc(uid)
+        .update({
+      'userFlightDoc': url,
+      
+    });
+
+    setState(() => visaDocUrl = url);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Flight Ticket uploaded successfully')),
+    );
+  } catch (e) {
+    debugPrint(e.toString());
+  } finally {
+    if (mounted) setState(() => isUploadingVisa = false);
+  }
+}
 
     ImageProvider? _getSelfieImage(String? imageData) {
     if (imageData == null) return null;
@@ -619,6 +687,39 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                     ),
                   ),
                 ),
+               OutlinedButton.icon(
+        onPressed: _pickVisaExpiryDate,
+        icon: const Icon(Iconsax.calendar),
+        label: Text(
+          visaExpiryDate == null
+              ? 'Set Expiry Date'
+              : 'Expiry: ${visaExpiryDate!.day.toString().padLeft(2, '0')}-'
+                '${visaExpiryDate!.month.toString().padLeft(2, '0')}-'
+                '${visaExpiryDate!.year}',
+        ),
+      
+    ),
+
+    const SizedBox(width: 12),
+
+    /// UPLOAD FILE BUTTON
+   ElevatedButton.icon(
+        onPressed: isUploadingVisa ? null : _uploadVisaFile,
+        icon: isUploadingVisa
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Iconsax.filter),
+        label: const Text('Upload File'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+        ),
+      ),
+    
+
               ],
             )
           else
