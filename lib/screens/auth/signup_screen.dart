@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 import 'package:visaguard/model/sign_up_model.dart';
+import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/services/user_registration_service.dart';
 import 'package:visaguard/utils/step_header.dart';
 import 'package:visaguard/utils/ui_helpers.dart';
@@ -223,12 +225,13 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    
+            final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: const Text('Create Account'),
+        title: Text(languageProvider.localizedStrings['Create New Account'] ?? 'Create New Account'),
         backgroundColor: isDarkMode ? Colors.grey[400] : Colors.white,
         foregroundColor: isDarkMode ? Colors.white : Colors.grey[900],
         elevation: 0,
@@ -260,7 +263,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   Widget _buildNameStep() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+                final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -278,7 +282,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Personal Information',
+                    languageProvider.localizedStrings['Personal Information'] ?? 'Personal Information',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -287,7 +291,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Let\'s start with your basic details',
+                    languageProvider.localizedStrings["Let's start with your basic details"] ?? "Let's start with your basic details",
                     style: TextStyle(
                       fontSize: 16,
                       color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -296,16 +300,16 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   const SizedBox(height: 40),
                   _buildTextField(
                     controller: nameCtrl,
-                    label: 'Full Name',
-                    hint: 'Enter your full name',
+                    label: languageProvider.localizedStrings["Full Name"]  ?? 'Full Name',
+                    hint: languageProvider.localizedStrings["Enter your full name"] ??'Enter your full name',
                     icon: Iconsax.user,
                     isRequired: true,
                   ),
                   const SizedBox(height: 24),
                   _buildInfoCard(
                     icon: Iconsax.shield_tick,
-                    title: 'Secure & Private',
-                    subtitle: 'Your information is encrypted and secure',
+                    title: languageProvider.localizedStrings["Secure & Private"]  ??  'Secure & Private',
+                    subtitle: languageProvider.localizedStrings["Your information is encrypted and secure"]  ?? 'Your information is encrypted and secure',
                   ),
                 ],
               ),
@@ -320,7 +324,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               data.name = nameCtrl.text.trim();
               next();
             },
-            primaryText: 'Continue',
+            primaryText:languageProvider.localizedStrings["Continue"]  ??  'Continue',
             showSecondary: false,
           ),
         ],
@@ -330,7 +334,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   Widget _buildPhoneStep() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+                    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -348,7 +353,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Phone Verification',
+                    languageProvider.localizedStrings['Phone Verification'] ?? 'Phone Verification',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -357,7 +362,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'We\'ll send an OTP to verify your number',
+                    languageProvider.localizedStrings["We'll send an OTP to verify your number"] ?? "We'll send an OTP to verify your number",
                     style: TextStyle(
                       fontSize: 16,
                       color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -368,8 +373,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   const SizedBox(height: 24),
                   _buildInfoCard(
                     icon: Iconsax.lock,
-                    title: 'Secure Verification',
-                    subtitle: 'OTP ensures account security',
+                    title: languageProvider.localizedStrings['Secure Verification'] ?? 'Secure Verification',
+                    subtitle: languageProvider.localizedStrings['OTP ensures account security'] ?? 'OTP ensures account security',
                   ),
                 ],
               ),
@@ -413,7 +418,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               }
             },
             onSecondary: previous,
-            primaryText: 'Send OTP',
+            primaryText: languageProvider.localizedStrings['Send OTP'] ??  'Send OTP',
             primaryLoading: loading,
           ),
         ],
@@ -507,7 +512,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   Widget _buildOtpStep() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+                        final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -525,7 +531,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Enter OTP',
+                    languageProvider.localizedStrings['Enter OTP'] ?? 'Enter OTP',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -584,13 +590,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  if (!_isOtpSent)
-                    TextButton(
-                      onPressed: () {
-                        // Resend OTP logic
-                      },
-                      child: const Text('Resend OTP'),
-                    ),
+                  
                 ],
               ),
             ),
@@ -617,7 +617,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               }
             },
             onSecondary: previous,
-            primaryText: 'Verify OTP',
+            primaryText: languageProvider.localizedStrings['Verify OTP'] ?? 'Verify OTP',
             primaryLoading: loading,
           ),
         ],
@@ -627,7 +627,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   Widget _buildPassportStep() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+                            final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -645,7 +646,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Passport Details',
+                    languageProvider.localizedStrings['Passport Details'] ?? 'Passport Details',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -654,7 +655,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Enter your passport number for verification',
+                    languageProvider.localizedStrings['Enter your passport number for verification'] ?? 'Enter your passport number for verification',
                     style: TextStyle(
                       fontSize: 16,
                       color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -663,18 +664,13 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   const SizedBox(height: 40),
                   _buildTextField(
                     controller: passportCtrl,
-                    label: 'Passport Number',
-                    hint: 'Enter passport number',
+                    label: languageProvider.localizedStrings['Passport Number'] ?? 'Passport Number',
+                    hint: languageProvider.localizedStrings['Enter passport number'] ?? 'Enter passport number',
                     icon: Iconsax.card,
                     isRequired: true,
                   ),
-                  const SizedBox(height: 24),
-                  _buildInfoCard(
-                    icon: Iconsax.security_safe,
-                    title: 'Secure Document',
-                    subtitle: 'Your passport details are encrypted',
-                  ),
-                ],
+                
+                ], 
               ),
             ),
           ),
@@ -688,7 +684,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               next();
             },
             onSecondary: previous,
-            primaryText: 'Continue',
+            primaryText: languageProvider.localizedStrings['Continue'] ?? 'Continue',
           ),
         ],
       ),
@@ -697,7 +693,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   Widget _buildSelfieStep() {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+    final languageProvider =Provider.of<LanguageProvider>(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -715,7 +711,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Selfie Verification',
+                    languageProvider.localizedStrings['Selfie Verification'] ?? 'Selfie Verification',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w400,
@@ -724,7 +720,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Take a clear selfie for identity verification',
+                    languageProvider.localizedStrings['Take a clear selfie for identity verification'] ?? 'Take a clear selfie for identity verification',
                     style: TextStyle(
                       fontSize: 16,
                       color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -771,7 +767,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                                 ),
                                 const SizedBox(height: 20),
                                 Text(
-                                  'Tap to take selfie',
+                                 languageProvider.localizedStrings['Tap to take selfie'] ?? 'Tap to take selfie',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
@@ -780,7 +776,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Ensure good lighting and face visibility',
+                                  languageProvider.localizedStrings['Ensure good lighting and face visibility'] ?? 'Ensure good lighting and face visibility',
                                   style: TextStyle(
                                     color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
                                   ),
@@ -790,12 +786,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                           : null,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  _buildInfoCard(
-                    icon: Iconsax.verify,
-                    title: 'Identity Verification',
-                    subtitle: 'Selfie helps verify your identity securely',
-                  ),
+                
                 ],
               ),
             ),
@@ -848,7 +839,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               }
             },
             onSecondary: previous,
-            primaryText: 'Complete Registration',
+            primaryText: languageProvider.localizedStrings['Complete Registration'] ?? 'Complete Registration',
             primaryLoading: loading,
           ),
         ],

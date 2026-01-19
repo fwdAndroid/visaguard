@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/auth/forgot_password_screen.dart';
 import 'package:visaguard/screens/auth/signup_screen.dart';
 import 'package:visaguard/screens/video_screen.dart';
@@ -116,6 +118,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
+        final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
@@ -163,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          'Welcome Back!',
+                          languageProvider.localizedStrings['Welcome Back!'] ?? "Welcome Back!",
                           style: TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -172,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Sign in to continue to Visa Guard',
+                        languageProvider.localizedStrings['Sign in to continue to Visa Guard'] ??   'Sign in to continue to Visa Guard',
                           style: TextStyle(
                             fontSize: 16,
                             color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -186,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                   // Phone Input
                   Text(
-                    'Phone Number',
+                    languageProvider.localizedStrings['Phone Number'] ?? 'Phone Number',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -215,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               color: isDarkMode ? Colors.white : Colors.black,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'Enter 10-digit mobile number start with +91',
+                              hintText: languageProvider.localizedStrings['Enter 10-digit mobile number start with +91'] ??  'Enter 10-digit mobile number start with +91',
                               border: InputBorder.none,
                               hintStyle: TextStyle(
                                 color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
@@ -235,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
                   // Password Input
                   Text(
-                    'Passport Number',
+                   languageProvider.localizedStrings['Passport Number'] ?? 'Passport Number',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -260,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         color: isDarkMode ? Colors.white : Colors.black,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Enter your passport number',
+                        hintText: languageProvider.localizedStrings['Enter your passport number'] ?? 'Enter your passport number',
                         border: InputBorder.none,
                         hintStyle: TextStyle(
                           color: isDarkMode ? Colors.grey[500] : Colors.grey[400],
@@ -298,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
                       ),
                       child: Text(
-                        'Forgot Passport?',
+                        languageProvider.localizedStrings['Forgot Password?'] ?? 'Forgot Password?',
                         style: TextStyle(
                           color: Colors.blue[600],
                           fontSize: 14,
@@ -338,8 +341,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text(
-                                  'Login',
+                              Text(
+                                  languageProvider.localizedStrings['Login'] ?? 'Login',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
@@ -368,7 +371,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
-                          'New to Visa Guard?',
+                       languageProvider.localizedStrings['New to Visa Guard?'] ?? 'New to Visa Guard?',
                           style: TextStyle(
                             color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
                             fontSize: 14,
@@ -407,8 +410,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: const Text(
-                        'Create New Account',
+                      child:  Text(
+                      languageProvider.localizedStrings['Create New Account'] ??  'Create New Account',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -424,14 +427,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
-                        text: 'By continuing, you agree to our ',
+                        text: languageProvider.localizedStrings['By continuing, you agree to our '] ??'By continuing, you agree to our ',
                         style: TextStyle(
                           color: isDarkMode ? Colors.grey[500] : Colors.grey[600],
                           fontSize: 12,
                         ),
                         children: [
                           TextSpan(
-                            text: 'Terms of Service',
+                            text:languageProvider.localizedStrings['Terms of Service'] ?? 'Terms of Service',
                             style: TextStyle(
                               color: Colors.blue[600],
                               fontWeight: FontWeight.w600,
