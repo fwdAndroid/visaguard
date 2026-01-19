@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
+import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/main/pages/user_account_screen.dart';
 import 'package:visaguard/screens/main/pages/user_home_screen.dart';
 
@@ -76,6 +78,8 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+     final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -84,14 +88,14 @@ class _MainDashboardScreenState extends State<MainDashboardScreen> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
+        items:  [
           BottomNavigationBarItem(
             icon: Icon(Icons.home, color: Colors.blue),
-            label: "Home",
+            label: languageProvider.localizedStrings["Home"] ?? "Home",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person, color: Colors.blue),
-            label: "Profile",
+            label: languageProvider.localizedStrings["Profile"] ??   "Profile",
           ),
         ],
       ),

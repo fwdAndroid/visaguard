@@ -1,7 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:visaguard/firebase_options.dart';
 import 'package:visaguard/helper/background_task.dart';
+import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/splash_screen.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -9,14 +11,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-   Workmanager().initialize(callbackDispatcher);
+  Workmanager().initialize(callbackDispatcher);
   Workmanager().registerPeriodicTask(
     'locationTask',
     'updateLocation',
     frequency: const Duration(minutes: 15),
   );
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        //Language
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+      ],
+
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

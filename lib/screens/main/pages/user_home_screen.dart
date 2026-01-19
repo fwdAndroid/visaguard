@@ -3,11 +3,13 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:visaguard/provider/language_provider.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -104,6 +106,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => Scaffold(
+          
           appBar: AppBar(
             title: const Text('Visa Document'),
             backgroundColor: Colors.deepPurple,
@@ -157,10 +160,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildQrCodeSection(BuildContext context) {
+  Widget _buildQrCodeSection(BuildContext context, LanguageProvider languageProvider) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final passportNumber = userData?['passportNumber'] ?? 'N/A';
-    
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(20),
@@ -188,7 +191,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
               Icon(Iconsax.scan_barcode, color: Colors.white, size: 24),
               const SizedBox(width: 12),
               Text(
-                'Passport QR Code',
+                languageProvider.localizedStrings["Passport QR Code"] ?? 'Passport QR Code',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -243,7 +246,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Scan for verification',
+                   languageProvider.localizedStrings["Scan for verification"] ??   'Scan for verification',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -270,7 +273,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Passport Number',
+                          languageProvider.localizedStrings["Passport Number"] ?? 'Passport Number',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
@@ -296,7 +299,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      'Tap to reveal QR',
+                      languageProvider.localizedStrings["Tap to reveal QR"] ??'Tap to reveal QR',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white,
@@ -310,7 +313,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
           const SizedBox(height: 8),
           if (!_showQrCode)
             Text(
-              'Tap eye icon to show QR code for verification',
+            languageProvider.localizedStrings["Tap eye icon to show QR code for verification"] ??  'Tap eye icon to show QR code for verification',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.white.withOpacity(0.8),
@@ -321,9 +324,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, LanguageProvider languageProvider) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+    final languageProvider = Provider.of<LanguageProvider>(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.only(top: 60, bottom: 30, left: 24, right: 24),
@@ -370,7 +373,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'My Profile',
+                    languageProvider.localizedStrings["My Profile"] ?? 'My Profile',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -379,7 +382,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Visa status & information',
+                   languageProvider.localizedStrings["Visa status & information"] ??   'Visa status & information',
                       style: TextStyle(
                         fontSize: 14,
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -508,9 +511,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildVisaStatus(BuildContext context) {
+  Widget _buildVisaStatus(BuildContext context, LanguageProvider languageProvider) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+      final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(20),
@@ -539,7 +543,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
               Icon(Iconsax.document_text, color: Colors.blue.shade700, size: 24),
               const SizedBox(width: 12),
               Text(
-                'Visa Status',
+                languageProvider.localizedStrings["Visa Status"] ?? 'Visa Status',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -570,7 +574,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Visa Approved',
+                            languageProvider.localizedStrings["Visa Approved"] ??  'Visa Approved',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -578,7 +582,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                               ),
                             ),
                             Text(
-                              'Document is ready to view',
+                              languageProvider.localizedStrings["Document is ready to view"] ?? 'Document is ready to view',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -609,8 +613,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                       elevation: 0,
                     ),
                     icon: Icon(Iconsax.document_download, size: 20),
-                    label: const Text(
-                      'View Visa Document',
+                    label:  Text(
+                     languageProvider.localizedStrings["View Visa Document"] ?? 'View Visa Document',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -636,7 +640,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Under Process',
+                             languageProvider.localizedStrings["Under Process"] ??   'Under Process',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -644,7 +648,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                               ),
                             ),
                             Text(
-                              'Your visa is being processed',
+                              languageProvider.localizedStrings["Your visa is being processed"] ??  'Your visa is being processed',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -670,9 +674,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, LanguageProvider languageProvider) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+          final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -702,7 +707,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Visa Extension',
+                            languageProvider.localizedStrings["Visa Extension"] ?? 'Visa Extension',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -711,7 +716,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Extend your visa period',
+                            languageProvider.localizedStrings["Extend your visa period"] ?? 'Extend your visa period',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -747,7 +752,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Contact Support',
+                          languageProvider.localizedStrings["Contact Support"] ??  'Contact Support',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -756,7 +761,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Get help & assistance',
+                           languageProvider.localizedStrings["Get help & assistance"] ?? 'Get help & assistance',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -778,7 +783,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+         final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[50],
       body: FadeTransition(
@@ -794,7 +800,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Loading your profile...',
+                     languageProvider.localizedStrings["Loading your profile..."] ?? 'Loading your profile...',
                       style: TextStyle(
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -810,7 +816,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                         Icon(Iconsax.profile_remove, size: 80, color: Colors.grey[400]),
                         const SizedBox(height: 20),
                         Text(
-                          'No user data found',
+                       languageProvider.localizedStrings["No user data found"] ??    'No user data found',
                           style: TextStyle(
                             fontSize: 18,
                             color: isDarkMode ? Colors.white : Colors.grey[900],
@@ -818,7 +824,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Please complete your profile setup',
+                        languageProvider.localizedStrings["Please complete your profile setup"] ??    'Please complete your profile setup',
                           style: TextStyle(
                             color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                           ),
@@ -835,7 +841,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                         pinned: true,
                         backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
                         flexibleSpace: FlexibleSpaceBar(
-                          background: _buildHeader(context),
+                          background: _buildHeader(context,languageProvider),
                         ),
                       ),
                       SliverToBoxAdapter(
@@ -844,12 +850,12 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                           children: [
                             const SizedBox(height: 16),
                             // QR Code Section (replaces passport info card)
-                            _buildQrCodeSection(context),
+                            _buildQrCodeSection(context,languageProvider),
                             const SizedBox(height: 16),
                             // Other information
                             _buildInfoTile(
                               Iconsax.calendar,
-                              'Registration Date',
+                           languageProvider.localizedStrings["Registration Date"] ??   'Registration Date',
                               userData!['createdAt'] != null
                                   ? (userData!['createdAt'] as Timestamp)
                                       .toDate()
@@ -860,9 +866,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
                               context,
                             ),
                             const SizedBox(height: 24),
-                            _buildVisaStatus(context),
+                            _buildVisaStatus(context,languageProvider),
                             const SizedBox(height: 24),
-                            _buildActionButtons(context),
+                            _buildActionButtons(context,languageProvider),
                             const SizedBox(height: 40),
                           ],
                         ),

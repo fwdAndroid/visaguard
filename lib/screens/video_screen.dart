@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -236,7 +238,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-
+ final languageProvider = Provider.of<LanguageProvider>(context);
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
       body: SafeArea(
@@ -274,7 +276,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Learn About Visa Process',
+                            languageProvider.localizedStrings["Learn About Visa Process"] ??'Learn About Visa Process',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -283,7 +285,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Complete all videos to continue',
+                           languageProvider.localizedStrings["Complete all videos to continue"] ?? 'Complete all videos to continue',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
