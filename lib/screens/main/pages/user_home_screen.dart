@@ -20,7 +20,8 @@ class UserHomeScreen extends StatefulWidget {
   State<UserHomeScreen> createState() => _UserHomeScreenState();
 }
 
-class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProviderStateMixin {
+class _UserHomeScreenState extends State<UserHomeScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic>? userData;
   String? visaDocUrl;
   bool isLoading = true;
@@ -28,8 +29,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> with SingleTickerProvid
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   bool _showQrCode = false;
-DateTime? visaExpiryDate;
-bool isUploadingVisa = false;
+  DateTime? visaExpiryDate;
+  bool isUploadingVisa = false;
   @override
   void initState() {
     super.initState();
@@ -38,10 +39,7 @@ bool isUploadingVisa = false;
       duration: const Duration(milliseconds: 800),
     );
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
     _animationController.forward();
     _fetchUserData();
@@ -82,78 +80,109 @@ bool isUploadingVisa = false;
       if (doc.exists && doc.data()?['visaDocUrl'] != null) {
         visaDocUrl = doc['visaDocUrl'];
         if (doc.data()?['expiryDate'] != null) {
-        visaExpiryDate =
-            (doc.data()!['expiryDate'] as Timestamp).toDate();
-      }
+          visaExpiryDate = (doc.data()!['expiryDate'] as Timestamp).toDate();
+        }
       }
     } catch (e) {
       debugPrint('Visa fetch error: $e');
     }
     setState(() => visaLoading = false);
   }
-Future<void> _pickVisaExpiryDate() async {
-  final picked = await showDatePicker(
-    context: context,
-    initialDate: visaExpiryDate ?? DateTime.now(),
-    firstDate: DateTime.now(),
-    lastDate: DateTime(2100),
-  );
 
-  if (picked != null) {
-    setState(() => visaExpiryDate = picked);
-  }
-}
 
-Future<void> _uploadVisaFile() async {
-  if (visaExpiryDate == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please select expiry date')),
-    );
-    return;
-  }
+  Future<void> _uploadVisaFile() async {
+    if (visaExpiryDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select expiry date')),
+      );
+      return;
+    }
 
-  final result = await FilePicker.platform.pickFiles(
-    withData: true,
-    type: FileType.custom,
-    allowedExtensions: ['pdf', 'jpg', 'png', 'doc', 'docx'],
-  );
-
-  if (result == null || result.files.single.bytes == null) return;
-
-  setState(() => isUploadingVisa = true);
-
-  try {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final file = result.files.single;
-
-    final ref = FirebaseStorage.instance.ref(
-      'visa_docs/$uid/${DateTime.now().millisecondsSinceEpoch}_${file.name}',
+    final result = await FilePicker.platform.pickFiles(
+      withData: true,
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'png', 'doc', 'docx'],
     );
 
-    final snap = await ref.putData(file.bytes!);
-    final url = await snap.ref.getDownloadURL();
+    if (result == null || result.files.single.bytes == null) return;
 
-    await FirebaseFirestore.instance
-        .collection('visa_documents')
-        .doc(uid)
-        .update({
-      'userFlightDoc': url,
-      
-    });
+    setState(() => isUploadingVisa = true);
 
-    setState(() => visaDocUrl = url);
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+      final file = result.files.single;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Flight Ticket uploaded successfully')),
-    );
-  } catch (e) {
-    debugPrint(e.toString());
-  } finally {
-    if (mounted) setState(() => isUploadingVisa = false);
+      final ref = FirebaseStorage.instance.ref(
+        'visa_docs/$uid/${DateTime.now().millisecondsSinceEpoch}_${file.name}',
+      );
+
+      final snap = await ref.putData(file.bytes!);
+      final url = await snap.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('visa_documents')
+          .doc(uid)
+          .update({'userFlightDoc': url});
+
+      setState(() => visaDocUrl = url);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Flight Ticket uploaded successfully')),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      if (mounted) setState(() => isUploadingVisa = false);
+    }
   }
-}
+//Return Ticket
+  Future<void> _uploadReturnFile() async {
+    if (visaExpiryDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select expiry date')),
+      );
+      return;
+    }
 
-    ImageProvider? _getSelfieImage(String? imageData) {
+    final result = await FilePicker.platform.pickFiles(
+      withData: true,
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'png', 'doc', 'docx'],
+    );
+
+    if (result == null || result.files.single.bytes == null) return;
+
+    setState(() => isUploadingVisa = true);
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+      final file = result.files.single;
+
+      final ref = FirebaseStorage.instance.ref(
+        'visa_docs/$uid/${DateTime.now().millisecondsSinceEpoch}_${file.name}',
+      );
+
+      final snap = await ref.putData(file.bytes!);
+      final url = await snap.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('visa_documents')
+          .doc(uid)
+          .update({'returnTicket': url});
+
+      setState(() => visaDocUrl = url);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Flight Ticket uploaded successfully')),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      if (mounted) setState(() => isUploadingVisa = false);
+    }
+  }
+
+  ImageProvider? _getSelfieImage(String? imageData) {
     if (imageData == null) return null;
 
     if (imageData.startsWith('http')) {
@@ -166,15 +195,60 @@ Future<void> _uploadVisaFile() async {
     } catch (_) {
       return null;
     }
-  
   }
+  //Hotel Booking
+  Future<void> _uploadHotel() async {
+    if (visaExpiryDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select expiry date')),
+      );
+      return;
+    }
+
+    final result = await FilePicker.platform.pickFiles(
+      withData: true,
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'png', 'doc', 'docx'],
+    );
+
+    if (result == null || result.files.single.bytes == null) return;
+
+    setState(() => isUploadingVisa = true);
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser!.uid;
+      final file = result.files.single;
+
+      final ref = FirebaseStorage.instance.ref(
+        'visa_docs/$uid/${DateTime.now().millisecondsSinceEpoch}_${file.name}',
+      );
+
+      final snap = await ref.putData(file.bytes!);
+      final url = await snap.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance
+          .collection('visa_documents')
+          .doc(uid)
+          .update({'hotelBooking': url});
+
+      setState(() => visaDocUrl = url);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Flight Ticket uploaded successfully')),
+      );
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      if (mounted) setState(() => isUploadingVisa = false);
+    }
+  }
+
 
   void _openVisaPdf(String url) {
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, __, ___) => Scaffold(
-          
           appBar: AppBar(
             title: const Text('Visa Document'),
             backgroundColor: Colors.deepPurple,
@@ -196,7 +270,7 @@ Future<void> _uploadVisaFile() async {
 
   Future<void> _openWhatsApp({bool isExtension = false}) async {
     const phoneNumber = '917718860398';
-    final message = isExtension 
+    final message = isExtension
         ? 'Hello, I would like to inquire about visa extension.'
         : 'Hello, I need assistance with my visa.';
     final encodedMessage = Uri.encodeComponent(message);
@@ -228,7 +302,30 @@ Future<void> _uploadVisaFile() async {
     );
   }
 
-  Widget _buildQrCodeSection(BuildContext context, LanguageProvider languageProvider) {
+  int _getRemainingDays(DateTime expiryDate) {
+    final today = DateTime.now();
+    final difference = expiryDate.difference(
+      DateTime(today.year, today.month, today.day),
+    );
+    return difference.inDays;
+  }
+
+  String _getRemainingDaysText(DateTime expiryDate) {
+    final daysLeft = _getRemainingDays(expiryDate);
+
+    if (daysLeft < 0) {
+      return 'Expired';
+    } else if (daysLeft == 0) {
+      return 'Expires today';
+    } else {
+      return '$daysLeft days left';
+    }
+  }
+
+  Widget _buildQrCodeSection(
+    BuildContext context,
+    LanguageProvider languageProvider,
+  ) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final passportNumber = userData?['passportNumber'] ?? 'N/A';
     final languageProvider = Provider.of<LanguageProvider>(context);
@@ -259,7 +356,8 @@ Future<void> _uploadVisaFile() async {
               Icon(Iconsax.scan_barcode, color: Colors.white, size: 24),
               const SizedBox(width: 12),
               Text(
-                languageProvider.localizedStrings["Passport QR Code"] ?? 'Passport QR Code',
+                languageProvider.localizedStrings["Passport QR Code"] ??
+                    'Passport QR Code',
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -281,7 +379,7 @@ Future<void> _uploadVisaFile() async {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           if (_showQrCode)
             Container(
               padding: const EdgeInsets.all(20),
@@ -314,7 +412,9 @@ Future<void> _uploadVisaFile() async {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                   languageProvider.localizedStrings["Scan for verification"] ??   'Scan for verification',
+                    languageProvider
+                            .localizedStrings["Scan for verification"] ??
+                        'Scan for verification',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -341,7 +441,9 @@ Future<void> _uploadVisaFile() async {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          languageProvider.localizedStrings["Passport Number"] ?? 'Passport Number',
+                          languageProvider
+                                  .localizedStrings["Passport Number"] ??
+                              'Passport Number',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.white.withOpacity(0.9),
@@ -361,27 +463,30 @@ Future<void> _uploadVisaFile() async {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      languageProvider.localizedStrings["Tap to reveal QR"] ??'Tap to reveal QR',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
+                      languageProvider.localizedStrings["Tap to reveal QR"] ??
+                          'Tap to reveal QR',
+                      style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ),
                 ],
               ),
             ),
-          
+
           const SizedBox(height: 8),
           if (!_showQrCode)
             Text(
-            languageProvider.localizedStrings["Tap eye icon to show QR code for verification"] ??  'Tap eye icon to show QR code for verification',
+              languageProvider
+                      .localizedStrings["Tap eye icon to show QR code for verification"] ??
+                  'Tap eye icon to show QR code for verification',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.white.withOpacity(0.8),
@@ -441,7 +546,8 @@ Future<void> _uploadVisaFile() async {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                    languageProvider.localizedStrings["My Profile"] ?? 'My Profile',
+                      languageProvider.localizedStrings["My Profile"] ??
+                          'My Profile',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -450,7 +556,9 @@ Future<void> _uploadVisaFile() async {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                   languageProvider.localizedStrings["Visa status & information"] ??   'Visa status & information',
+                      languageProvider
+                              .localizedStrings["Visa status & information"] ??
+                          'Visa status & information',
                       style: TextStyle(
                         fontSize: 14,
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -459,10 +567,9 @@ Future<void> _uploadVisaFile() async {
                   ],
                 ),
               ),
-           
             ],
           ),
-          
+
           // User Profile
           Row(
             children: [
@@ -472,10 +579,7 @@ Future<void> _uploadVisaFile() async {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.deepPurple,
-                        width: 3,
-                      ),
+                      border: Border.all(color: Colors.deepPurple, width: 3),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.deepPurple.withOpacity(0.2),
@@ -491,12 +595,14 @@ Future<void> _uploadVisaFile() async {
                           ? _getSelfieImage(userData!['selfieUrl'])
                           : null,
                       child: userData!['selfieUrl'] == null
-                          ? Icon(Iconsax.profile_circle, 
-                              size: 50, color: Colors.grey[400])
+                          ? Icon(
+                              Iconsax.profile_circle,
+                              size: 50,
+                              color: Colors.grey[400],
+                            )
                           : null,
                     ),
                   ),
-                 
                 ],
               ),
               const SizedBox(width: 20),
@@ -515,15 +621,21 @@ Future<void> _uploadVisaFile() async {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Iconsax.call, 
-                          size: 16, 
-                          color: isDarkMode ? Colors.grey[400] : Colors.grey[600]),
+                        Icon(
+                          Iconsax.call,
+                          size: 16,
+                          color: isDarkMode
+                              ? Colors.grey[400]
+                              : Colors.grey[600],
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           userData!['phone'] ?? 'No Phone',
                           style: TextStyle(
                             fontSize: 14,
-                            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                            color: isDarkMode
+                                ? Colors.grey[400]
+                                : Colors.grey[600],
                           ),
                         ),
                       ],
@@ -538,50 +650,12 @@ Future<void> _uploadVisaFile() async {
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String label, String value, Color color, BuildContext context) {
+  Widget _buildVisaStatus(
+    BuildContext context,
+    LanguageProvider languageProvider,
+  ) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Material(
-        color: isDarkMode ? Colors.grey[800] : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.1),
-        child: ListTile(
-          leading: Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          title: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-            ),
-          ),
-          subtitle: Text(
-            value,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDarkMode ? Colors.white : Colors.grey[900],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVisaStatus(BuildContext context, LanguageProvider languageProvider) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-      final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -608,10 +682,15 @@ Future<void> _uploadVisaFile() async {
         children: [
           Row(
             children: [
-              Icon(Iconsax.document_text, color: Colors.blue.shade700, size: 24),
+              Icon(
+                Iconsax.document_text,
+                color: Colors.blue.shade700,
+                size: 24,
+              ),
               const SizedBox(width: 12),
               Text(
-                languageProvider.localizedStrings["Visa Status"] ?? 'Visa Status',
+                languageProvider.localizedStrings["Visa Status"] ??
+                    'Visa Status',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -621,9 +700,11 @@ Future<void> _uploadVisaFile() async {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           if (visaLoading)
-            Center(child: CircularProgressIndicator(color: Colors.blue.shade700))
+            Center(
+              child: CircularProgressIndicator(color: Colors.blue.shade700),
+            )
           else if (visaDocUrl != null)
             Column(
               children: [
@@ -635,27 +716,62 @@ Future<void> _uploadVisaFile() async {
                   ),
                   child: Row(
                     children: [
-                      Icon(Iconsax.tick_circle, color: Colors.green, size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                            languageProvider.localizedStrings["Visa Approved"] ??  'Visa Approved',
+                              languageProvider
+                                      .localizedStrings["Visa Approved"] ??
+                                  'Visa Approved',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isDarkMode ? Colors.white : Colors.grey[900],
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Colors.grey[900],
                               ),
                             ),
                             Text(
-                              languageProvider.localizedStrings["Document is ready to view"] ?? 'Document is ready to view',
+                              languageProvider
+                                      .localizedStrings["Document is ready to view"] ??
+                                  'Document is ready to view',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                color: isDarkMode
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                             ),
+                            Center(
+                              child: Text(
+                                visaExpiryDate == null
+                                    ? 'Set Expiry Date'
+                                    : 'Expiry: ${visaExpiryDate!.day.toString().padLeft(2, '0')}-'
+                                          '${visaExpiryDate!.month.toString().padLeft(2, '0')}-'
+                                          '${visaExpiryDate!.year}',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            if (visaExpiryDate != null)
+                              Center(
+                                child: Text(
+                                  _getRemainingDaysText(visaExpiryDate!),
+                                  style: TextStyle(
+                                    color:
+                                        _getRemainingDays(visaExpiryDate!) <= 30
+                                        ? Colors.red
+                                        : Colors.green,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -681,45 +797,64 @@ Future<void> _uploadVisaFile() async {
                       elevation: 0,
                     ),
                     icon: Icon(Iconsax.document_download, size: 20),
-                    label:  Text(
-                     languageProvider.localizedStrings["View Visa Document"] ?? 'View Visa Document',
+                    label: Text(
+                      languageProvider.localizedStrings["View Visa Document"] ??
+                          'View Visa Document',
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
-               OutlinedButton.icon(
-        onPressed: _pickVisaExpiryDate,
-        icon: const Icon(Iconsax.calendar),
-        label: Text(
-          visaExpiryDate == null
-              ? 'Set Expiry Date'
-              : 'Expiry: ${visaExpiryDate!.day.toString().padLeft(2, '0')}-'
-                '${visaExpiryDate!.month.toString().padLeft(2, '0')}-'
-                '${visaExpiryDate!.year}',
-        ),
-      
-    ),
 
-    const SizedBox(width: 12),
+                const SizedBox(width: 12),
 
-    /// UPLOAD FILE BUTTON
-   ElevatedButton.icon(
-        onPressed: isUploadingVisa ? null : _uploadVisaFile,
-        icon: isUploadingVisa
-            ? const SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Iconsax.filter),
-        label: const Text('Upload File'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.white,
-        ),
-      ),
-    
-
+                /// UPLOAD FILE BUTTON
+                ElevatedButton.icon(
+                  onPressed: isUploadingVisa ? null : _uploadVisaFile,
+                  icon: isUploadingVisa
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Iconsax.filter),
+                  label: const Text('Upload Flght Ticket'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                  /// UPLOAD FILE BUTTON
+                ElevatedButton.icon(
+                  onPressed: isUploadingVisa ? null : _uploadReturnFile,
+                  icon: isUploadingVisa
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Iconsax.filter),
+                  label: const Text('Upload Return Ticket'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                      /// UPLOAD Hote BUTTON
+                ElevatedButton.icon(
+                  onPressed: isUploadingVisa ? null : _uploadHotel,
+                  icon: isUploadingVisa
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Iconsax.filter),
+                  label: const Text('Upload Hotel Booking'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
               ],
             )
           else
@@ -741,18 +876,26 @@ Future<void> _uploadVisaFile() async {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                             languageProvider.localizedStrings["Under Process"] ??   'Under Process',
+                              languageProvider
+                                      .localizedStrings["Under Process"] ??
+                                  'Under Process',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: isDarkMode ? Colors.white : Colors.grey[900],
+                                color: isDarkMode
+                                    ? Colors.white
+                                    : Colors.grey[900],
                               ),
                             ),
                             Text(
-                              languageProvider.localizedStrings["Your visa is being processed"] ??  'Your visa is being processed',
+                              languageProvider
+                                      .localizedStrings["Your visa is being processed"] ??
+                                  'Your visa is being processed',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                                color: isDarkMode
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                               ),
                             ),
                           ],
@@ -763,7 +906,9 @@ Future<void> _uploadVisaFile() async {
                 ),
                 const SizedBox(height: 12),
                 LinearProgressIndicator(
-                  backgroundColor: isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  backgroundColor: isDarkMode
+                      ? Colors.grey[800]
+                      : Colors.grey[200],
                   color: Colors.orange,
                   minHeight: 6,
                   borderRadius: BorderRadius.circular(3),
@@ -775,9 +920,12 @@ Future<void> _uploadVisaFile() async {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, LanguageProvider languageProvider) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    LanguageProvider languageProvider,
+  ) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-          final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -804,23 +952,35 @@ Future<void> _uploadVisaFile() async {
                               color: Colors.orange.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: Icon(Iconsax.calendar_add, color: Colors.orange, size: 30),
+                            child: Icon(
+                              Iconsax.calendar_add,
+                              color: Colors.orange,
+                              size: 30,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            languageProvider.localizedStrings["Visa Extension"] ?? 'Visa Extension',
+                            languageProvider
+                                    .localizedStrings["Visa Extension"] ??
+                                'Visa Extension',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDarkMode ? Colors.white : Colors.grey[900],
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Colors.grey[900],
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            languageProvider.localizedStrings["Extend your visa period"] ?? 'Extend your visa period',
+                            languageProvider
+                                    .localizedStrings["Extend your visa period"] ??
+                                'Extend your visa period',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                           ),
                         ],
@@ -849,23 +1009,35 @@ Future<void> _uploadVisaFile() async {
                               color: Colors.green.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(14),
                             ),
-                            child: Icon(Iconsax.message_question, color: Colors.green, size: 30),
+                            child: Icon(
+                              Iconsax.message_question,
+                              color: Colors.green,
+                              size: 30,
+                            ),
                           ),
                           const SizedBox(height: 12),
                           Text(
-                          languageProvider.localizedStrings["Contact Support"] ??  'Contact Support',
+                            languageProvider
+                                    .localizedStrings["Contact Support"] ??
+                                'Contact Support',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isDarkMode ? Colors.white : Colors.grey[900],
+                              color: isDarkMode
+                                  ? Colors.white
+                                  : Colors.grey[900],
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                           languageProvider.localizedStrings["Get help & assistance"] ?? 'Get help & assistance',
+                            languageProvider
+                                    .localizedStrings["Get help & assistance"] ??
+                                'Get help & assistance',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
                             ),
                           ),
                         ],
@@ -884,7 +1056,7 @@ Future<void> _uploadVisaFile() async {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-         final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.grey[50],
@@ -901,7 +1073,9 @@ Future<void> _uploadVisaFile() async {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                     languageProvider.localizedStrings["Loading your profile..."] ?? 'Loading your profile...',
+                      languageProvider
+                              .localizedStrings["Loading your profile..."] ??
+                          'Loading your profile...',
                       style: TextStyle(
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -910,72 +1084,67 @@ Future<void> _uploadVisaFile() async {
                 ),
               )
             : userData == null
-                ? Center(
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Iconsax.profile_remove,
+                      size: 80,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      languageProvider.localizedStrings["No user data found"] ??
+                          'No user data found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: isDarkMode ? Colors.white : Colors.grey[900],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      languageProvider
+                              .localizedStrings["Please complete your profile setup"] ??
+                          'Please complete your profile setup',
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : CustomScrollView(
+                slivers: [
+                  SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    expandedHeight: 200,
+                    floating: false,
+                    pinned: true,
+                    backgroundColor: isDarkMode
+                        ? Colors.grey[900]
+                        : Colors.white,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: _buildHeader(context, languageProvider),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Iconsax.profile_remove, size: 80, color: Colors.grey[400]),
-                        const SizedBox(height: 20),
-                        Text(
-                       languageProvider.localizedStrings["No user data found"] ??    'No user data found',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: isDarkMode ? Colors.white : Colors.grey[900],
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                        languageProvider.localizedStrings["Please complete your profile setup"] ??    'Please complete your profile setup',
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                        ),
+                        const SizedBox(height: 16),
+                        // QR Code Section (replaces passport info card)
+                        _buildQrCodeSection(context, languageProvider),
+
+                        _buildVisaStatus(context, languageProvider),
+                        const SizedBox(height: 24),
+                        _buildActionButtons(context, languageProvider),
+                        const SizedBox(height: 40),
                       ],
                     ),
-                  )
-                : CustomScrollView(
-                    slivers: [
-                      SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        expandedHeight: 200,
-                        floating: false,
-                        pinned: true,
-                        backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
-                        flexibleSpace: FlexibleSpaceBar(
-                          background: _buildHeader(context,languageProvider),
-                        ),
-                      ),
-                      SliverToBoxAdapter(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 16),
-                            // QR Code Section (replaces passport info card)
-                            _buildQrCodeSection(context,languageProvider),
-                            const SizedBox(height: 16),
-                            // Other information
-                            _buildInfoTile(
-                              Iconsax.calendar,
-                           languageProvider.localizedStrings["Registration Date"] ??   'Registration Date',
-                              userData!['createdAt'] != null
-                                  ? (userData!['createdAt'] as Timestamp)
-                                      .toDate()
-                                      .toString()
-                                      .split(' ')[0]
-                                  : 'N/A',
-                              Colors.purple,
-                              context,
-                            ),
-                            const SizedBox(height: 24),
-                            _buildVisaStatus(context,languageProvider),
-                            const SizedBox(height: 24),
-                            _buildActionButtons(context,languageProvider),
-                            const SizedBox(height: 40),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
+                ],
+              ),
       ),
     );
   }
