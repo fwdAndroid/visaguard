@@ -1,4 +1,4 @@
-package com.example.visaguard
+package com.visaguard.app
 
 import io.flutter.embedding.android.FlutterActivity
 

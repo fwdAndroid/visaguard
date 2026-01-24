@@ -261,15 +261,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                 ),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        // Handle back navigation
-                      },
-                      icon: Icon(
-                        Icons.arrow_back_rounded,
-                        color: isDarkMode ? Colors.white : Colors.grey[800],
-                      ),
-                    ),
+                  
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(

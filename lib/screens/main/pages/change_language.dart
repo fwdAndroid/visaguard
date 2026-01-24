@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/auth/login_screen.dart';
+import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 
 class ChangeLangage extends StatefulWidget {
   const ChangeLangage({super.key});
@@ -380,33 +383,57 @@ class _ChangeLangageState extends State<ChangeLangage> with SingleTickerProvider
                    
 
                       // Apply Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Optional: Add confirmation or animation
-                            Navigator.pop(context);
-                            Navigator.push(context, MaterialPageRoute(builder: (builder) => LoginScreen()));
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            languageProvider.localizedStrings['Apply'] ?? "Apply Changes",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
+                     SizedBox(
+  width: double.infinity,
+  height: 56,
+  child: ElevatedButton(
+    onPressed: () async {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists) {
+          // UID exists in Firestore, go to Main Dashboard
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => MainDashboardScreen()),
+          );
+        } else {
+          // UID not found, go to LoginScreen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => LoginScreen()),
+          );
+        }
+      } else {
+        // No user logged in, go to LoginScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => LoginScreen()),
+        );
+      }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.deepPurple,
+      foregroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      elevation: 0,
+    ),
+    child: Text(
+      languageProvider.localizedStrings['Apply'] ?? "Apply Changes",
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  ),
+),
 
                       const SizedBox(height: 20),
                     ],

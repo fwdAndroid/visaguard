@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:451151488028:android:72cfe7d89d00643e0f2bd9",
+        "mobilesdk_app_id": "1:451151488028:android:36316b7d8e8980220f2bd9",
         "android_client_info": {
-          "package_name": "com.example.visaguard"
+          "package_name": "com.visaguard.app"
         }
       },
       "oauth_client": [],

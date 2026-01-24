@@ -10,6 +10,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:visaguard/model/sign_up_model.dart';
 import 'package:visaguard/provider/language_provider.dart';
+import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 import 'package:visaguard/services/user_registration_service.dart';
 import 'package:visaguard/utils/step_header.dart';
 import 'package:visaguard/utils/ui_helpers.dart';
@@ -669,7 +670,10 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                     icon: Iconsax.card,
                     isRequired: true,
                   ),
-                
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset("assets/id.png"),
+                  )
                 ], 
               ),
             ),
@@ -1026,14 +1030,14 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Skip'),
+            child: const Text('Skip',style: TextStyle(color: Colors.white),),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
             ),
-            child: const Text('Allow'),
+            child: const Text('Allow',style: TextStyle(color: Colors.white),),
           ),
         ],
       ),
@@ -1053,17 +1057,17 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
           ],
         ),
         content: const Text(
-          'Your account has been created successfully! Our team will review your application and you\'ll be notified once approved.',
+          'Your account has been created successfully! ',
         ),
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.popUntil(context, (route) => route.isFirst);
+              Navigator.push(context, MaterialPageRoute(builder: (builder) => MainDashboardScreen()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
             ),
-            child: const Text('Continue'),
+            child: const Text('Continue',style: TextStyle(color: Colors.white),),
           ),
         ],
       ),

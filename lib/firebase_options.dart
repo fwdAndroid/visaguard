@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -49,9 +46,19 @@ class DefaultFirebaseOptions {
     }
   }
 
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDQHV-Eh9fH54SrZKUT19eKdC46updbqQw',
+    appId: '1:451151488028:web:fd383c2dc236df9e0f2bd9',
+    messagingSenderId: '451151488028',
+    projectId: 'ais-visaguard',
+    authDomain: 'ais-visaguard.firebaseapp.com',
+    storageBucket: 'ais-visaguard.firebasestorage.app',
+    measurementId: 'G-KR9Y5MDQKC',
+  );
+
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDkgjHiV8AJXc6Z1wPK0daXjM27XZA9M8A',
-    appId: '1:451151488028:android:72cfe7d89d00643e0f2bd9',
+    appId: '1:451151488028:android:36316b7d8e8980220f2bd9',
     messagingSenderId: '451151488028',
     projectId: 'ais-visaguard',
     storageBucket: 'ais-visaguard.firebasestorage.app',
@@ -59,10 +66,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyADWgHwQ6O1zv6k3RiwMAlYcMsWmoN3JKs',
-    appId: '1:451151488028:ios:d3d33238864f82070f2bd9',
+    appId: '1:451151488028:ios:d009db07746b3f9f0f2bd9',
     messagingSenderId: '451151488028',
     projectId: 'ais-visaguard',
     storageBucket: 'ais-visaguard.firebasestorage.app',
-    iosBundleId: 'com.example.visaguard',
+    iosBundleId: 'com.visaguard.app',
   );
 }
