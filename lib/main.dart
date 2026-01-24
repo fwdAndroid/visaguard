@@ -11,12 +11,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  Workmanager().initialize(callbackDispatcher);
-  Workmanager().registerPeriodicTask(
-    'locationTask',
-    'updateLocation',
-    frequency: const Duration(minutes: 15),
-  );
+  // Workmanager().initialize(callbackDispatcher);
+  // Workmanager().registerPeriodicTask(
+  //   'locationTask',
+  //   'updateLocation',
+  //   frequency: const Duration(minutes: 15),
+  // );
 
   runApp(
     MultiProvider(
