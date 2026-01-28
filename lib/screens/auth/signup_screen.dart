@@ -10,7 +10,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:visaguard/model/sign_up_model.dart';
 import 'package:visaguard/provider/language_provider.dart';
-import 'package:visaguard/screens/main/main_dashboard_screen.dart';
+import 'package:visaguard/screens/commitment_screen.dart';
 import 'package:visaguard/services/user_registration_service.dart';
 
 class SignupFlowScreen extends StatefulWidget {
@@ -1027,7 +1027,7 @@ debugPrint('LOCATION RESULT: $location');
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (builder) => MainDashboardScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (builder) => ComplianceAgreementScreen()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
