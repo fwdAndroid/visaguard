@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "ais-visaguard"
-  }
+  },
+  "targets": {
+    "ais-visaguard": {
+      "hosting": {
+        "aisavisaguard": [
+          "aisavisaguard"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visaguard/provider/language_provider.dart';
@@ -7,6 +9,7 @@ import 'package:visaguard/screens/auth/signup_screen.dart';
 import 'package:visaguard/screens/video_screen.dart';
 import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 import 'package:visaguard/services/auth_service.dart';
+import 'package:visaguard/services/location_task_handle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -77,6 +80,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         password: _passwordController.text.trim(),
       );
 
+            final uid = FirebaseAuth.instance.currentUser!.uid;
+      final pref = await SharedPreferences.getInstance();
+      await pref.setString('current_uid', uid);
+
+      await FlutterForegroundTask.saveData(key: 'uid', value: uid);
+      await FlutterForegroundTask.startService(
+        notificationTitle: 'VisaGuard Location Active',
+        notificationText: 'Updating location every 10 minutes',
+        callback: (){
+          FlutterForegroundTask.setTaskHandler(LocationTaskHandler());
+        },
+      );
+
+
       final prefs = await SharedPreferences.getInstance();
       final hasWatchedVideos = prefs.getBool('hasWatchedVideos') ?? false;
 
@@ -124,9 +141,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: Padding(
+          child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,7 +472,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
           ),
         ),
-      ),
+      
     );
   }
 }

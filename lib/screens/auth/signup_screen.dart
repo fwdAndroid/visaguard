@@ -1,19 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:visaguard/model/sign_up_model.dart';
 import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/main/main_dashboard_screen.dart';
 import 'package:visaguard/services/user_registration_service.dart';
-import 'package:visaguard/utils/step_header.dart';
-import 'package:visaguard/utils/ui_helpers.dart';
 
 class SignupFlowScreen extends StatefulWidget {
   const SignupFlowScreen({super.key});
@@ -39,8 +37,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
 
   String dialCode = '+91';
   String? verificationId;
-  File? selfie;
-  String? _locationStatus;
+  XFile ? selfie;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
@@ -86,43 +83,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
     }
   }
 
-  Future<String> _getLocationSafe() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return 'Location services disabled';
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return 'Location permission required';
-    }
-
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.medium,
-        timeLimit: const Duration(seconds: 10),
-      );
-
-      final placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
-
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        return '${place.locality ?? ''}, ${place.country ?? ''}'.trim();
-      }
-      return 'Location acquired';
-    } catch (e) {
-      return 'Unable to fetch location';
-    }
-  }
-
+  
   void _startOtpTimer() {
     setState(() {
       _isOtpSent = true;
@@ -733,14 +694,14 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   const SizedBox(height: 40),
                   GestureDetector(
                     onTap: () async {
-                      final image = await ImagePicker().pickImage(
-                        source: ImageSource.camera,
-                        imageQuality: 85,
-                        preferredCameraDevice: CameraDevice.front,
-                      );
-                      if (image != null) {
-                        setState(() => selfie = File(image.path));
-                      }
+                     final image = await ImagePicker().pickImage(
+  source: ImageSource.camera, // Web will fallback to file picker
+  imageQuality: 85,
+);
+
+if (image != null) {
+  setState(() => selfie = image);
+}
                     },
                     child: Container(
                       width: double.infinity,
@@ -753,12 +714,14 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                           width: 2,
                           style: selfie == null ? BorderStyle.solid : BorderStyle.none,
                         ),
-                        image: selfie != null
-                            ? DecorationImage(
-                                image: FileImage(selfie!),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
+                       image: selfie != null
+    ? DecorationImage(
+        image: kIsWeb
+            ? NetworkImage(selfie!.path)
+            : FileImage(File(selfie!.path)) as ImageProvider,
+        fit: BoxFit.cover,
+      )
+    : null,
                       ),
                       child: selfie == null
                           ? Column(
@@ -810,7 +773,6 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
               try {
                 final auth = FirebaseAuth.instance;
                 final reg = UserRegistrationService();
-                final location = await _getLocationSafe();
                 
                 // Create Firebase Auth user
                 final cred = await auth.createUserWithEmailAndPassword(
@@ -823,6 +785,8 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   uid: cred.user!.uid,
                   selfie: selfie!,
                 );
+final location = await reg.getLocationWithAddress();
+debugPrint('LOCATION RESULT: $location');
 
                 // Save user profile
                 await reg.saveUserProfile(
@@ -832,6 +796,7 @@ class _SignupFlowScreenState extends State<SignupFlowScreen>
                   phone: data.phone!,
                   passportNumber: data.passport!,
                   selfieUrl: selfieUrl,
+                  location: location,
                 );
 
                 setState(() => loading = false);
