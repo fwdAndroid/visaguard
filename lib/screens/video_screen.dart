@@ -193,23 +193,74 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
       });
       await _loadVideoAtIndex(currentIndex);
     } else {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('hasWatchedVideos', true);
+      await _completeVideosAndNavigate();
+    }
+  }
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (_, __, ___) => const MainDashboardScreen(),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
+  Future<void> _skipAllVideos() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Skip Videos',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          content: Text(
+            
+            'Are you sure you want to skip all videos? You can watch them later from the help section.',
+            style: const TextStyle(height: 1.5),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _completeVideosAndNavigate();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[700],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(
+                 'Skip',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
         );
-      }
+      },
+    );
+  }
+
+  Future<void> _completeVideosAndNavigate() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('hasWatchedVideos', true);
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => const MainDashboardScreen(),
+          transitionsBuilder: (_, animation, __, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+        ),
+      );
     }
   }
 
@@ -238,7 +289,8 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
- final languageProvider = Provider.of<LanguageProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    
     return Scaffold(
       backgroundColor: isDarkMode ? Colors.grey[900] : Colors.white,
       body: SafeArea(
@@ -246,7 +298,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
           scale: _scaleAnimation,
           child: Column(
             children: [
-              // App Bar
+              // App Bar with Skip Button
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
@@ -261,14 +313,29 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                 ),
                 child: Row(
                   children: [
-                  
+                    // Logo/Back Button
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[700] : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Iconsax.video,
+                        color: Colors.blue[700],
+                        size: 20,
+                      ),
+                    ),
                     const SizedBox(width: 8),
+                    
+                    // Title Section
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            languageProvider.localizedStrings["Learn About Visa Process"] ??'Learn About Visa Process',
+                            languageProvider.localizedStrings["Learn About Visa Process"] ?? 'Learn About Visa Process',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
@@ -277,7 +344,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                           ),
                           const SizedBox(height: 2),
                           Text(
-                           languageProvider.localizedStrings["Complete all videos to continue"] ?? 'Complete all videos to continue',
+                            languageProvider.localizedStrings["Complete all videos to continue"] ?? 'Complete all videos to continue',
                             style: TextStyle(
                               fontSize: 12,
                               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -286,6 +353,8 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                         ],
                       ),
                     ),
+                    
+                    // Video Counter
                     if (videos.isNotEmpty)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -295,6 +364,28 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                         ),
                         child: Text(
                           '${currentIndex + 1}/${videos.length}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue[700],
+                          ),
+                        ),
+                      ),
+                    
+                    const SizedBox(width: 12),
+                    
+                    // Skip Button
+                    if (videos.isNotEmpty)
+                      TextButton(
+                        onPressed: _skipAllVideos,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          languageProvider.localizedStrings["Skip"] ?? 'Skip',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -322,6 +413,8 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
   }
 
   Widget _buildLoadingScreen(bool isDarkMode) {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -332,7 +425,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
           ),
           const SizedBox(height: 16),
           Text(
-            'Loading videos...',
+            languageProvider.localizedStrings["Loading videos..."] ?? 'Loading videos...',
             style: TextStyle(
               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
             ),
@@ -343,6 +436,8 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
   }
 
   Widget _buildErrorScreen(bool isDarkMode) {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -356,7 +451,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
             ),
             const SizedBox(height: 24),
             Text(
-              'No Videos Available',
+              languageProvider.localizedStrings["No Videos Available"] ?? 'No Videos Available',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
@@ -365,6 +460,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
             ),
             const SizedBox(height: 12),
             Text(
+              languageProvider.localizedStrings["There are no videos to display at the moment."] ??
               'There are no videos to display at the moment.',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -383,7 +479,18 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
-              child: const Text('Retry'),
+              child: Text(languageProvider.localizedStrings["Retry"] ?? 'Retry'),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: _skipAllVideos,
+              child: Text(
+                languageProvider.localizedStrings["Skip to Dashboard"] ?? 'Skip to Dashboard',
+                style: TextStyle(
+                  color: Colors.blue[700],
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
@@ -394,6 +501,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
   Widget _buildVideoContent(BuildContext context, bool isDarkMode) {
     final currentVideo = videos[currentIndex];
     final hasNextVideo = currentIndex < videos.length - 1;
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -595,7 +703,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Completion Progress',
+                      languageProvider.localizedStrings["Completion Progress"] ?? 'Completion Progress',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -627,7 +735,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Video ${currentIndex + 1}/${videos.length}',
+                      '${languageProvider.localizedStrings["Video"] ?? "Video"} ${currentIndex + 1}/${videos.length}',
                       style: TextStyle(
                         fontSize: 12,
                         color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
@@ -643,7 +751,7 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            'Ready to continue',
+                            languageProvider.localizedStrings["Ready to continue"] ?? 'Ready to continue',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.green,
@@ -682,7 +790,9 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    hasNextVideo ? 'Next Video' : 'Complete & Continue',
+                    hasNextVideo
+                        ? languageProvider.localizedStrings["Next Video"] ?? 'Next Video'
+                        : languageProvider.localizedStrings["Complete & Continue"] ?? 'Complete & Continue',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -699,6 +809,19 @@ class _VideoScreenState extends State<VideoScreen> with SingleTickerProviderStat
           ),
 
           const SizedBox(height: 8),
+
+          // Skip Individual Video Button (optional)
+          if (!_isButtonEnabled)
+            TextButton(
+              onPressed: _skipAllVideos,
+              child: Text(
+                languageProvider.localizedStrings["Skip All Videos"] ?? 'Skip All Videos',
+                style: TextStyle(
+                  color: Colors.blue[700],
+                  fontSize: 14,
+                ),
+              ),
+            ),
         ],
       ),
     );

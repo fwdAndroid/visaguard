@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:visaguard/provider/language_provider.dart';
 import 'package:visaguard/screens/auth/login_screen.dart';
+import 'package:visaguard/screens/main/pages/app_disclosure.dart';
 import 'package:visaguard/screens/main/pages/change_language.dart';
 import 'package:visaguard/screens/main/pages/profile_screen.dart';
 import 'package:visaguard/services/auth_service.dart';
@@ -35,6 +37,23 @@ class UserAccountScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (builder) => ChangeLangage()),
               );
             }),
+            _tile(
+  context,
+  Icons.web,
+  languageProvider.localizedStrings["Privacy Policy"] ?? 'Privacy Policy',
+  () {
+    _openUrl('https://visaguardprivacy.web.app');
+  },
+),
+    _tile(
+  context,
+  Icons.web,
+  languageProvider.localizedStrings["App Disclosure"] ?? 'App Disclosure',
+  () {
+    Navigator.push(context, MaterialPageRoute(builder: (builder) => DisclosurePage()));
+  },
+),
+
 
             // Logout
             _tile(
@@ -49,6 +68,16 @@ class UserAccountScreen extends StatelessWidget {
       ),
     );
   }
+  
+  Future<void> _openUrl(String url) async {
+  final Uri uri = Uri.parse(url);
+  if (!await launchUrl(
+    uri,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw 'Could not launch $url';
+  }
+}
 }
 
 Widget _tile(
